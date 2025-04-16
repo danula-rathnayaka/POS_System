@@ -1,0 +1,188 @@
+import re
+
+from model.basket import Basket
+from model.item import Item
+
+
+class POS:
+    def __init__(self):
+        # Initialize the POS system with an empty basket
+        self.basket = Basket()
+
+    def add_item_to_basket(self):
+        # Get validated input for all item properties
+        item_code = self.get_valid_input(
+            "Item code: ",
+            str,
+            lambda x: re.match(r'^\w+$', x),  # \w = [A-Za-z0-9_]
+            "Invalid item code: Only letters, numbers, and underscores are allowed."
+        )
+        internal_price = self.get_valid_input(
+            "Internal price: ",
+            float,
+            lambda x: x >= 0,
+            "Internal price cannot be negative."
+        )
+        discount = self.get_valid_input(
+            "Discount: ",
+            float,
+            lambda x: 0 <= x <= 100,
+            "Discount must be between 0 and 100."
+        )
+        sale_price = self.get_valid_input(
+            "Sale price: ",
+            float,
+            lambda x: x >= 0,
+            "Sale price cannot be negative."
+        )
+        quantity = self.get_valid_input(
+            "Quantity: ",
+            int,
+            lambda x: x > 0,
+            "Quantity must be a positive integer."
+        )
+
+        # Add the validated item to the basket
+        self.basket.add_item(Item(item_code, internal_price, discount, sale_price, quantity))
+        print("Item added.\n")
+
+    def delete_item_from_basket(self):
+        # Prevent deletion if basket is empty
+        if len(self.basket.get_items()) == 0:
+            print("Basket is empty. No items to delete.\n")
+            return
+
+        # Get index to delete and remove item
+        index = self.get_valid_input(
+            "Enter line number to delete: ",
+            int,
+            lambda x: 1 <= x <= len(self.basket.get_items()),
+            "Invalid index. Please enter a valid line number."
+        ) - 1
+        removed = self.basket.delete_item(index)
+        print(f"Item removed from basket\n: {removed}" if removed else "Invalid index.")
+
+    def update_item_in_basket(self):
+        # Prevent update if basket is empty
+        if len(self.basket.get_items()) == 0:
+            print("Basket is empty. No items to update.\n")
+            return
+
+        # Get index of item to update
+        index = self.get_valid_input(
+            "Enter line number to update: ",
+            int,
+            lambda x: 1 <= x <= len(self.basket.get_items()),
+            "Invalid index. Please enter a valid line number."
+        ) - 1
+
+        # Prompt user for update options
+        item = self.basket.get_item(index)
+        print("\nWhat would you like to update?")
+        print("1. Sale Price")
+        print("2. Discount")
+        print("3. Quantity")
+        print("4. All of the above")
+
+        option = self.get_valid_input(
+            "Choose an option (1-4): ",
+            int,
+            lambda x: 1 <= x <= 4,
+            "Please enter a valid option (1 to 4)."
+        )
+
+        # Apply updates based on the selected option
+        if option == 1 or option == 4:
+            item.set_sale_price(self.get_valid_input(
+                "New sale price: ",
+                float,
+                lambda x: x >= 0,
+                "Sale price cannot be negative."
+            ))
+        if option == 2 or option == 4:
+            item.set_discount(self.get_valid_input(
+                "New discount: ",
+                float,
+                lambda x: 0 <= x <= 100,
+                "Discount must be between 0 and 100."
+            ))
+        if option == 3 or option == 4:
+            item.set_quantity(self.get_valid_input(
+                "New quantity: ",
+                int,
+                lambda x: x > 0,
+                "Quantity must be a positive integer."
+            ))
+
+        print("Item updated.\n")
+
+    def show_basket(self):
+        items = self.basket.get_items()  # Check if basket is empty
+        if len(items) == 0:
+            print("Basket is empty.\n")
+        else:
+            # Display all items in the basket if not empty
+            print("\nBasket:")
+            print(items)  # Basket __str__ overridden to format the output
+
+    def run(self):
+        # Main menu loop for user interaction
+        while True:
+            print("\n=== POS System Menu ===")
+            print("\n1. Add item to basket")
+            print("2. Show basket")
+            print("3. Delete item")
+            print("4. Update item")
+            print("5. Generate bill")
+            print("6. Search bill")
+            print("7. Generate tax file")
+            print("0. Exit")
+            choice = self.get_valid_input(
+                "Choose an option: ",
+                int,
+                lambda x: 0 <= x <= 7,
+                "Invalid option. Please choose a number between 0 and 7."
+            )
+
+            # Calling the required method according to users input
+            match choice:
+                case 1:
+                    self.add_item_to_basket()
+                case 2:
+                    self.show_basket()
+                case 3:
+                    self.delete_item_from_basket()
+                case 4:
+                    self.update_item_in_basket()
+                case 5:
+                    # TODO: Implement bill generation logic
+                    pass
+                case 6:
+                    # TODO: Implement bill search functionality
+                    pass
+                case 7:
+                    # TODO: Implement tax file generation logic
+                    pass
+                case 0:
+                    print("Exiting POS System.")
+                    break
+                case _:
+                    print("Invalid option. Try again.")
+
+    def get_valid_input(self, prompt, cast_type, validate_fn=None, error_msg="Invalid Input"):
+        # Handles input conversion and validation
+        while True:
+            try:
+                value = cast_type(input(prompt))  # Convert input to expected type
+                if validate_fn and not validate_fn(value):  # Check additional validation if provided
+                    print(error_msg)  # Provided error message
+                else:
+                    return value
+            except ValueError:
+                print("Invalid input. Please enter a valid value.")  # Short error message
+
+
+# Entry point to start the application
+if __name__ == "__main__":
+    pos_system = POS()
+    pos_system.run()

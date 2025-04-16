@@ -22,14 +22,20 @@ class Basket:
         """
         return self.__basket.pop(index)
 
-    def update_item(self, index, item):
+    def update_item(self, index, sale_price, discount, quantity):
         """
         Updates sale price, discount, and quantity of an item by index.
 
         :param index: Index of the item to update
-        :param item: Updated item to add to the basket
+        :param quantity: Updated quantity of the product
+        :param discount: Updated discount of the product
+        :param sale_price: Updated sale price of the product
         """
-        self.__basket[index] = item
+        item = self.__basket[index]
+        item.set_sale_price(sale_price)
+        item.set_discount(discount)
+        item.set_quantity(quantity)
+        return item
 
     def get_item(self, index):
         """
