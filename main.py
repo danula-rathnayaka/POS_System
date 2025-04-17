@@ -136,6 +136,32 @@ class POS:
         else:
             print("No items in the cart")
 
+    def search_bill(self):
+        # Check if there are any bills
+        if len(self.__bill_list) == 0:
+            print("No bills to search.")
+            return
+
+        # Ask the user to input the Bill ID to search for
+        search_id = self.get_valid_input(
+            "Enter the Bill ID to search: ",
+            int,
+            lambda x: x > 0,  # Bill ID should be positive
+            "Bill ID should be positive."
+        )
+
+        # Search for the bill in the bill list
+        for bill in self.__bill_list:
+
+            # Format the input ID to match the stored format
+            if bill.get_bill_id() == str(search_id).zfill(4):
+                # Bill found, print its details
+                print(f"Bill found: \n{bill}")
+                return
+
+        # If loop completes without returning, the bill was not found
+        print(f"Bill with ID {search_id} not found.")
+
     def run(self):
         # Main menu loop for user interaction
         while True:
@@ -168,8 +194,7 @@ class POS:
                 case 5:
                     self.generate_bill()
                 case 6:
-                    # TODO: Implement bill search functionality
-                    pass
+                    self.search_bill()
                 case 7:
                     # TODO: Implement tax file generation logic
                     pass
