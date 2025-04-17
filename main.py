@@ -1,13 +1,16 @@
 import re
 
 from model.basket import Basket
+from model.bill import Bill
 from model.item import Item
 
 
 class POS:
     def __init__(self):
         # Initialize the POS system with an empty basket
-        self.basket = Basket()
+        self.__basket = Basket()
+        self.__bill_id = 1  # Used to generate unique bill IDs
+        self.__bill_list = []
 
     def add_item_to_basket(self):
         # Get validated input for all item properties
@@ -43,12 +46,12 @@ class POS:
         )
 
         # Add the validated item to the basket
-        self.basket.add_item(Item(item_code, internal_price, discount, sale_price, quantity))
+        self.__basket.add_item(Item(item_code, internal_price, discount, sale_price, quantity))
         print("Item added.\n")
 
     def delete_item_from_basket(self):
         # Prevent deletion if basket is empty
-        if len(self.basket.get_items()) == 0:
+        if len(self.__basket.get_items()) == 0:
             print("Basket is empty. No items to delete.\n")
             return
 
@@ -56,15 +59,15 @@ class POS:
         index = self.get_valid_input(
             "Enter line number to delete: ",
             int,
-            lambda x: 1 <= x <= len(self.basket.get_items()),
+            lambda x: 1 <= x <= len(self.__basket.get_items()),
             "Invalid index. Please enter a valid line number."
         ) - 1
-        removed = self.basket.delete_item(index)
+        removed = self.__basket.delete_item(index)
         print(f"Item removed from basket\n: {removed}" if removed else "Invalid index.")
 
     def update_item_in_basket(self):
         # Prevent update if basket is empty
-        if len(self.basket.get_items()) == 0:
+        if len(self.__basket.get_items()) == 0:
             print("Basket is empty. No items to update.\n")
             return
 
@@ -72,12 +75,12 @@ class POS:
         index = self.get_valid_input(
             "Enter line number to update: ",
             int,
-            lambda x: 1 <= x <= len(self.basket.get_items()),
+            lambda x: 1 <= x <= len(self.__basket.get_items()),
             "Invalid index. Please enter a valid line number."
         ) - 1
 
         # Prompt user for update options
-        item = self.basket.get_item(index)
+        item = self.__basket.get_item(index)
         print("\nWhat would you like to update?")
         print("1. Sale Price")
         print("2. Discount")
@@ -117,13 +120,21 @@ class POS:
         print("Item updated.\n")
 
     def show_basket(self):
-        items = self.basket.get_items()  # Check if basket is empty
-        if len(items) == 0:
+        if len(self.__basket.get_items()) == 0:  # Check if basket is empty
             print("Basket is empty.\n")
         else:
             # Display all items in the basket if not empty
             print("\nBasket:")
-            print(items)  # Basket __str__ overridden to format the output
+            print(self.__basket)  # Basket __str__ overridden to format the output
+
+    def generate_bill(self):
+        if len(self.__basket.get_items()) != 0:
+            bill = Bill(bill_id=self.__bill_id, items=self.__basket.get_items())  # Create a new bill
+            self.__bill_list.append(bill)  # Adding the bill to the bill list
+            print(bill)
+            self.__bill_id += 1  # Incrementing the bill id
+        else:
+            print("No items in the cart")
 
     def run(self):
         # Main menu loop for user interaction
@@ -155,8 +166,7 @@ class POS:
                 case 4:
                     self.update_item_in_basket()
                 case 5:
-                    # TODO: Implement bill generation logic
-                    pass
+                    self.generate_bill()
                 case 6:
                     # TODO: Implement bill search functionality
                     pass
