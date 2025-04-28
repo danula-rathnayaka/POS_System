@@ -25,8 +25,8 @@ class POS:
         internal_price = self.get_valid_input(
             "Internal price: ",
             float,
-            lambda x: x >= 0,
-            "Internal price cannot be negative."
+            lambda x: x > 0,
+            "Internal price should be positive."
         )
         discount = self.get_valid_input(
             "Discount: ",
@@ -37,8 +37,8 @@ class POS:
         sale_price = self.get_valid_input(
             "Sale price: ",
             float,
-            lambda x: x >= 0,
-            "Sale price cannot be negative."
+            lambda x: x > 0,
+            "Sale price should be positive."
         )
         quantity = self.get_valid_input(
             "Quantity: ",
