@@ -31,8 +31,8 @@ class POS:
         discount = self.get_valid_input(
             "Discount: ",
             float,
-            lambda x: 0 <= x <= 100,
-            "Discount must be between 0 and 100."
+            lambda x: x >= 0,
+            "Discount must be positive"
         )
         sale_price = self.get_valid_input(
             "Sale price: ",

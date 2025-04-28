@@ -63,7 +63,7 @@ class Item:
         Calculates and returns the line total for the item.
         Line Total = sale price x quantity - discount.
         """
-        return self.__sale_price * self.__quantity - self.__discount
+        return (self.__sale_price - self.__discount) * self.__quantity
 
     def to_dict(self):
         """
