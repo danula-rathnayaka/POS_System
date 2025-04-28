@@ -1,16 +1,17 @@
 import re
+from datetime import datetime
 
 from model.basket import Basket
 from model.bill import Bill
 from model.item import Item
-from utils.util import append_csv
+from utils.util import write_csv
 
 
 class POS:
     def __init__(self):
         # Initialize the POS system with an empty basket
         self.__basket = Basket()
-        self.__bill_id = 1000  # Used to generate unique bill IDs
+        self.__bill_id = 1  # Used to generate unique bill IDs
         self.__bill_list = []
 
     def add_item_to_basket(self):
@@ -49,6 +50,7 @@ class POS:
         # Add the validated item to the basket
         self.__basket.add_item(Item(item_code, internal_price, discount, sale_price, quantity))
         print("Item added.\n")
+        self.show_basket()
 
     def delete_item_from_basket(self):
         # Prevent deletion if basket is empty
@@ -130,10 +132,12 @@ class POS:
 
     def generate_bill(self):
         if len(self.__basket.get_items()) != 0:
-            bill = Bill(bill_id=self.__bill_id, items=self.__basket.get_items())  # Create a new bill
+            bill = Bill(bill_id=f"{datetime.now().strftime('%y%m%d')}{self.__bill_id}",
+                        items=self.__basket.get_items())  # Create a new bill
             self.__bill_list.append(bill)  # Adding the bill to the bill list
             print(bill)
             self.__bill_id += 1  # Incrementing the bill id
+            self.__basket.clear()
         else:
             print("No items in the cart")
 
@@ -170,10 +174,12 @@ class POS:
             return
 
         # Define the output CSV file name and the column headers
-        file_name = "tax_report.csv"
+        file_name = f"tax_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         headers = [
             "bill_id", "item_code", "internal_price", "discount", "sale_price", "quantity", "line_total", "checksum"
         ]
+
+        all_rows = []
 
         # Process each bill in the system
         for bill in self.__bill_list:
@@ -194,27 +200,29 @@ class POS:
 
                 # Generate a checksum using a string representation of all row values
                 row["checksum"] = self.generate_checksum(''.join(str(value) for value in row.values()))
+                all_rows.append(row)
 
-                # Append the row with checksum to the CSV file using the util method
-                append_csv(row, headers, file_name)
+        # Append the row with checksum to the CSV file using the util method
+        write_csv(all_rows, headers, file_name)
 
         print(f"Tax report has been generated and saved to '{file_name}'.")
 
     def generate_checksum(self, data):
-        weighted_sum = 0
+        upper_case = 0
+        lower_case = 0
+        number_and_dots = 0
 
-        for index, char in enumerate(data):
-            # Weight each char by position (1-based index to avoid multiplying by 0)
-            weighted_sum += (index + 1) * ord(char)
+        for char in data:
+            if char.isupper():
+                upper_case += 1
+            elif char.islower():
+                lower_case += 1
+            elif char.isdigit() or char == '.':
+                number_and_dots += 1
 
-        # Return the two's complement within 8-bit size
-        checksum = (~weighted_sum + 1) & 0xFF
-        return checksum
+        return upper_case + lower_case + number_and_dots
 
     def run(self):
-
-        self.generate_sample_bills()
-
         # Main menu loop for user interaction
         while True:
             print("\n=== POS System Menu ===")

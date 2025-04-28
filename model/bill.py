@@ -42,7 +42,7 @@ class Bill:
         header_row = "| Line | Item Code      | Internal Price | Sale Price   | Discount   | Quantity | Line Total   |"
 
         # Start assembling the table
-        bill_table = f"\n1Bill ID: {self.__bill_id}\nTimestamp: {self.__timestamp}\n{header_line}\n{header_row}\n{header_line}\n"
+        bill_table = f"\nBill ID: {self.__bill_id}\nTimestamp: {self.__timestamp}\n{header_line}\n{header_row}\n{header_line}\n"
 
         # Add the row for each item in the bill
         for i, item in enumerate(self.__items):
