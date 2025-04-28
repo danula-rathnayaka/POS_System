@@ -66,7 +66,7 @@ class POS:
             "Invalid index. Please enter a valid line number."
         ) - 1
         removed = self.__basket.delete_item(index)
-        print(f"Item removed from basket\n: {removed}" if removed else "Invalid index.")
+        print(f"Item removed from basket:\n{removed}" if removed else "Invalid index.")
 
     def update_item_in_basket(self):
         # Prevent update if basket is empty
@@ -120,7 +120,7 @@ class POS:
                 "Quantity must be a positive integer."
             ))
 
-        print("Item updated.\n")
+        print(f"Item updated.\n{item}")
 
     def show_basket(self):
         if len(self.__basket.get_items()) == 0:  # Check if basket is empty
